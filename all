@@ -1,0 +1,97 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+//Функция находит точку пересечения двух отрезков
+vector<double>get_intersection(vector<double> vertex1, vector<double> vertex2, vector<double> vertex3, vector<double> vertex4) {
+    double x = 0;double y = 0;
+    vector<double> intersection;
+    if (vertex2[0] - vertex1[0] == 0 ) {
+        x = vertex1[0];
+        double m2 = ((vertex4[1] - vertex3[1]) / (vertex4[0] - vertex3[0]));
+        double b2 = vertex3[1] - m2 * vertex3[0];
+        y = m2 * x + b2;
+    }
+
+    else if (vertex4[0] - vertex3[0] == 0) {
+        x = vertex3[0];
+        double m1 = ((vertex2[1] - vertex1[1]) / (vertex2[0] - vertex1[0]));
+        double b1 = vertex1[1] - m1 * vertex1[0];
+        y = m1 * x + b1;
+    }
+    else {
+        double m1 = (vertex2[1] - vertex1[1]) / (vertex2[0] - vertex1[0]);
+        double b1 = vertex1[1] - m1 * vertex1[0];
+        double m2 = (vertex4[1] - vertex3[1]) / (vertex4[0] - vertex3[0]);
+        double b2 = vertex3[1] - m2 * vertex3[0];
+        x=(b2 - b1) / (m1 - m2);
+        y = m1 * x + b1;      
+    }
+
+        intersection.push_back(round(x));
+        intersection.push_back(round(y));
+
+        return intersection;
+}
+
+//Функция проверяет находится ли точка внутри или вне фигуры
+bool point_is_inside(vector < double>vertex1, vector<double> vertex2, vector<double>vertex3) {
+ if (((vertex3[1] - vertex1[1]) * (vertex2[0] - vertex1[0]) - ((vertex3[0] - vertex1[0]) * (vertex2[1] - vertex1[1]))) <= 0) return false;
+ else return true; }
+
+//Функция находит все точки пересечения фигур
+void get_coordinates(vector<vector<double>>coordinates1, vector<vector<double>>coordinates2,vector<vector<double>>&output) {
+    vector<double> vertex1;vector<double>vertex2;vector<double>vertex3;vector<double> vertex4;vector<vector<double>>next;
+    output = coordinates1;vector<vector<double>>new_coordinates;
+    for (int i = 0;i < coordinates2.size();i++) {
+        if (output.size() == 0) { exit(0); }
+        new_coordinates = output;
+        output = {};
+        if (i == 0) {vertex1 = coordinates2[coordinates2.size() - 1];}
+        else { vertex1 = coordinates2[i - 1]; }
+        vertex2 = coordinates2[i];
+
+        for(int j=0;j<new_coordinates.size();j++){
+            
+            if (j == 0 ) { vertex3 = new_coordinates[new_coordinates.size() - 1]; }
+            else { vertex3 = new_coordinates[j - 1];}
+            vertex4 = new_coordinates[j];
+           
+            if (point_is_inside(vertex1,vertex2,vertex4)) {               
+                if (not point_is_inside(vertex1,vertex2,vertex3)) {
+                    vector<double>a = get_intersection(vertex3, vertex4, vertex1, vertex2);
+                    output.push_back(a);
+                }            
+                output.push_back(vertex4);
+            }
+            else if (point_is_inside(vertex1,vertex2,vertex3)) {
+                output.push_back(get_intersection(vertex3, vertex4, vertex1, vertex2));
+
+            }
+        }
+        
+           
+    }
+}
+
+//Функция нахождения площади
+double count_square(vector < vector<double>>output) {
+    output.push_back(output[0]);
+    double xSum = 0; double ySum = 0;
+    for (int i=0;i <= output.size() - 2;i++) {
+        xSum += output[i][0] * output[i + 1][1];
+        ySum += output[i][1] * output[i + 1][0];}
+        return 0.5 * abs(xSum - ySum);
+}
+
+int main() {
+    std::vector<std::vector<double>>coordinates1 = { {1, 5} ,{4, 2}, {7, 5},{4,8} };
+    std::vector<std::vector<double>>coordinates2 = { {6, 1}, {8, 3}, {2, 9}};
+
+    std::vector<std::vector<double>>coordinates3;
+    get_coordinates(coordinates1, coordinates2,coordinates3);
+    for (int i = 0;i < (coordinates3.size());i++) {
+        cout << coordinates3[i][0] << coordinates3[i][1] << endl;}
+    cout << count_square(coordinates3);
+	return 0;
+}
